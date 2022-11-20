@@ -13,42 +13,44 @@
 
 -- [[MiradeliaX Script]]
 	local MXName = "MiradeliaX"
-	local MXVersion = 2.55
+	local MXVersion = 1.3
 	-- {Update Script}
 		local response = false
-		async_http.init("raw.githubusercontent.com", "/xX-LulzSecC4t-Xx/MiradeliaX/main/MiradeliaXVersion.lua", function(output)
-			currentVer = tonumber(output)
-			response = true
-			if MXVersion ~= currentVer then
-				util.toast("New MiradeliaX version is available!!!")
-				menu.action(menu.my_root(), "Update MiradeliaX", {}, "", function()
-					async_http.init("raw.githubusercontent.com","/xX-LulzSecC4t-Xx/MiradeliaX/main/MiradeliaX.lua",function(a)
-						local err = select(2,load(a))
-						if err then
-							util.toast("Script failed to download. Please try again later. If this continues to happen then manually update via github.")
-						return end
-						local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
-						f:write(a)
-						f:close()
-						util.toast("Successfully updated MiradeliaX. Restarting Script...")
-						util.restart_script()
+			async_http.init("raw.githubusercontent.com", "/xX-LulzSecC4t-Xx/MiradeliaX/main/MiradeliaXVersion.lua", function(output)
+				currentVer = tonumber(output)
+				response = true
+				if MXVersion ~= currentVer then
+					util.show_corner_help("~h~~p~New MiradeliaX version is available!!!")
+					--util.toast("New MiradeliaX version is available!!!")
+					menu.action(menu.my_root(), "Update MiradeliaX", {}, "", function()
+						async_http.init("raw.githubusercontent.com","/xX-LulzSecC4t-Xx/MiradeliaX/main/MiradeliaX.lua",function(a)
+							local err = select(2,load(a))
+							if err then
+								util.show_corner_help("~r~Script failed to download. Please try again later. If this continues to happen then manually update via github.")
+								--util.toast("Script failed to download. Please try again later. If this continues to happen then manually update via github.")
+							return end
+							local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
+							f:write(a)
+							f:close()
+							util.show_corner_help("~g~Successfully updated MiradeliaX.")
+							--util.toast("Successfully updated MiradeliaX. Restarting Script...")
+							util.yield(1250)
+							util.restart_script()
+						end)
+						async_http.dispatch()
 					end)
-					async_http.dispatch()
-				end)
-			end
-		end, function() response = true end)
-		async_http.dispatch()
-		repeat 
-			util.yield()
-		until response
+				end
+			end, function() response = true end)
+			async_http.dispatch()
+			repeat 
+				util.yield()
+			until response
 	-- {Locals}	
 		local debug = false
 		util.keep_running()
 		-- (All Locals)
 			local MX = menu
 			require("lib/C4tScripts/NativesMX")
-			local required <const> = {"lib/C4tScripts/Spoofing.lua"}
-			local Spoofing = require "C4tScripts.Spoofing"
 			-- Translater
 				local whitelisted_langs = {}
 				local language_codes_by_enum = {
@@ -723,16 +725,16 @@
 			local function BlockSyncs(pid, callback)
 				for _, i in ipairs(players.list(false, true, true)) do
 					if i ~= pid then
-						local outSync = PT.ref_by_rel_path(PT.player_root(i), "Outgoing Syncs>Block")
-						PT.trigger_command(outSync, "on")
+						local outSync = MX.ref_by_rel_path(MX.player_root(i), "Outgoing Syncs>Block")
+						MX.trigger_command(outSync, "on")
 					end
 				end
 				util.yield(10)
 				callback()
 					for _, i in ipairs(players.list(false, true, true)) do
 					if i ~= pid then
-						local outSync = PT.ref_by_rel_path(PT.player_root(i), "Outgoing Syncs>Block")
-						PT.trigger_command(outSync, "off")
+						local outSync = MX.ref_by_rel_path(MX.player_root(i), "Outgoing Syncs>Block")
+						MX.trigger_command(outSync, "off")
 					end
 				end end
 			local function get_friend_count()
@@ -744,19 +746,19 @@
 				balls = MX.list(friendlist, name, {"friend "..name}, "", function(); end)
 					MX.divider(balls, "---> "..name.. " <---")
 					MX.action(balls,"Join", {"jf "..name}, "",function()
-						PT.trigger_commands("join "..name)
+						MX.trigger_commands("join "..name)
 					end)
 					MX.action(balls,"Spectate", {"sf "..name}, "",function()
-						PT.trigger_commands("namespectate "..name)
+						MX.trigger_commands("namespectate "..name)
 					end)
 					MX.action(balls,"Invite", {"if "..name}, "",function()
-						PT.trigger_commands("invite "..name)
+						MX.trigger_commands("invite "..name)
 					end)
 					MX.action(balls,"Open Profile", {"pf "..name}, "",function()
-						PT.trigger_commands("nameprofile "..name)
+						MX.trigger_commands("nameprofile "..name)
 					end)
 					MX.action(balls,"Add to History", {"ath "..name}, "",function()
-						PT.trigger_commands("historyadd "..name)
+						MX.trigger_commands("historyadd "..name)
 					end)end
 			function PlayerlistFeatures(pid)
 				MX.divider(MX.player_root(pid), "~~~> PsyxhoTxolling <~~~")
@@ -895,7 +897,7 @@
 			get_vtable_entry_pointer = function(address, index)
 				 return memory.read_long(memory.read_long(address) + (8 * index))end
 			get_sub_handling_types = function(vehicle, type)
-				local veh_handling_address = memory.read_long(entities.handle_to_pointer(vehicle) + 0x938)
+				local veh_handling_address = memory.read_long(entities.handle_to_pointer(vehicle) + 0x918)
 				local sub_handling_array = memory.read_long(veh_handling_address + 0x0158)
 				local sub_handling_count = memory.read_ushort(veh_handling_address + 0x0160)
 				local types = {registerd = sub_handling_count, found = 0}
@@ -941,14 +943,16 @@
 					if util.is_session_started() then
 					memory.write_float(memory.script_global(262145 + 30176), 200000.0)
 					end end)
+				MX.toggle_loop(pvpoptions, "Max Auto-Aim Range", {""}, "", function()
+					PLAYER.SET_PLAYER_LOCKON_RANGE_OVERRIDE(players.user(), 99999999.0)end)
 				MX.divider(pvpoptions, "---> Weapon Buffs <---")
 				MX.toggle(pvpoptions, "Better Precision Rifle", {}, "", function(on_toggle)
 					if on_toggle then
-						PT.trigger_commands("damagemultiplier".." ".."1.60")
-						PT.trigger_commands("rangemultiplier".." ".."1.50")
+						MX.trigger_commands("damagemultiplier".." ".."1.60")
+						MX.trigger_commands("rangemultiplier".." ".."1.50")
 					else
-						PT.trigger_commands("damagemultiplier".." ".."1.00")
-						PT.trigger_commands("rangemultiplier".." ".."1.00")
+						MX.trigger_commands("damagemultiplier".." ".."1.00")
+						MX.trigger_commands("rangemultiplier".." ".."1.00")
 					end end)
 				MX.divider(pvpoptions, "---> Request's <---")
 				MX.action(pvpoptions, "Ballistic Armor", {}, "", function(on)
@@ -1396,103 +1400,28 @@
 						gen_fren_funcs(name)
 						::yes::
 					end
-			spoofingoptions = MX.list(onlineoptions, "> Spoofing Stuff", {}, "", function(); end)
-				profilename = MX.list(spoofingoptions, "> Name's & RID's", {}, "", function(); end)
-					MX.divider(profilename, "---> Name's & RID's <---")
-					MX.action(profilename, Acc_1.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_1.RID)
-						PT.trigger_commands("spoofedname "..Acc_1.Name)
-						util.toast("You're now spoofed as "..Acc_1.Name.." ("..Acc_1.RID..")")end)
-					MX.action(profilename, Acc_2.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_2.RID)
-						PT.trigger_commands("spoofedname "..Acc_2.Name)
-						util.toast("You're now spoofed as "..Acc_2.Name.." ("..Acc_2.RID..")")end)
-					MX.action(profilename, Acc_3.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_3.RID)
-						PT.trigger_commands("spoofedname "..Acc_3.Name)
-						util.toast("You're now spoofed as "..Acc_3.Name.." ("..Acc_3.RID..")")end)
-					MX.action(profilename, Acc_4.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_4.RID)
-						PT.trigger_commands("spoofedname "..Acc_4.Name)
-						util.toast("You're now spoofed as "..Acc_4.Name.." ("..Acc_4.RID..")")end)
-					MX.action(profilename, Acc_5.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_5.RID)
-						PT.trigger_commands("spoofedname "..Acc_5.Name)
-						util.toast("You're now spoofed as "..Acc_5.Name.." ("..Acc_5.RID..")")end)
-					MX.action(profilename, Acc_6.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_6.RID)
-						PT.trigger_commands("spoofedname "..Acc_6.Name)
-						util.toast("You're now spoofed as "..Acc_6.Name.." ("..Acc_6.RID..")")end)
-					MX.action(profilename, Acc_7.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_7.RID)
-						PT.trigger_commands("spoofedname "..Acc_7.Name)
-						util.toast("You're now spoofed as "..Acc_7.Name.." ("..Acc_7.RID..")")end)
-					MX.action(profilename, Acc_8.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_8.RID)
-						PT.trigger_commands("spoofedname "..Acc_8.Name)
-						util.toast("You're now spoofed as "..Acc_8.Name.." ("..Acc_8.RID..")")end)
-					MX.action(profilename, Acc_9.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_9.RID)
-						PT.trigger_commands("spoofedname "..Acc_9.Name)
-						util.toast("You're now spoofed as "..Acc_9.Name.." ("..Acc_9.RID..")")end)
-					MX.action(profilename, Acc_10.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_10.RID)
-						PT.trigger_commands("spoofedname "..Acc_10.Name)
-						util.toast("You're now spoofed as "..Acc_10.Name.." ("..Acc_10.RID..")")end)
-					MX.action(profilename, Acc_11.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_11.RID)
-						PT.trigger_commands("spoofedname "..Acc_11.Name)
-						util.toast("You're now spoofed as "..Acc_11.Name.." ("..Acc_11.RID..")")end)
-					MX.action(profilename, Acc_12.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_12.RID)
-						PT.trigger_commands("spoofedname "..Acc_12.Name)
-						util.toast("You're now spoofed as "..Acc_12.Name.." ("..Acc_12.RID..")")end)
-					MX.action(profilename, Acc_13.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_13.RID)
-						PT.trigger_commands("spoofedname "..Acc_13.Name)
-						util.toast("You're now spoofed as "..Acc_13.Name.." ("..Acc_13.RID..")")end)
-					MX.action(profilename, Acc_14.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_14.RID)
-						PT.trigger_commands("spoofedname "..Acc_14.Name)
-						util.toast("You're now spoofed as "..Acc_14.Name.." ("..Acc_14.RID..")")end)
-					MX.action(profilename, Acc_15.Name, {}, "", function(on)
-						PT.trigger_commands("spoofedrid "..Acc_15.RID)
-						PT.trigger_commands("spoofedname "..Acc_15.Name)
-						util.toast("You're now spoofed as "..Acc_15.Name.." ("..Acc_15.RID..")")end)
-				profilecrew = MX.list(spoofingoptions, "> Crew's", {}, "", function(); end)
-					MX.divider(profilecrew, "---> Crew's <---")
-					MX.action(profilecrew, Crew_1.CrewTag, {}, "", function(on)
-						PT.trigger_commands("crewid "..Crew_1.CrewID)
-						PT.trigger_commands("crewtag "..Crew_1.CrewTag)
-						PT.trigger_commands("crewname "..Crew_1.CrewName)
-						PT.trigger_commands("crewmotto "..Crew_1.CrewMotto)
-						PT.trigger_commands("crewaltbadge "..Crew_1.CrewBadge)
-						util.toast("Crew spoofed as "..Crew_1.CrewTag)end)
-					MX.action(profilecrew, Crew_2.CrewTag, {}, "", function(on)
-						PT.trigger_commands("crewid "..Crew_2.CrewID)
-						PT.trigger_commands("crewtag "..Crew_2.CrewTag)
-						PT.trigger_commands("crewname "..Crew_2.CrewName)
-						PT.trigger_commands("crewmotto "..Crew_2.CrewMotto)
-						PT.trigger_commands("crewaltbadge "..Crew_2.CrewBadge)
-						util.toast("Crew spoofed as "..Crew_2.CrewTag)end)
+			requestoptions = MX.list(onlineoptions, "> Request's", {}, "", function(); end)
+				MX.divider(requestoptions, "---> Request's <---")
+					MX.action(requestoptions, "MOC", {}, "", function(on)
+						SET_INT_GLOBAL(2815059 + 913, 1)end)
+					MX.action(requestoptions, "Avenger", {}, "", function(on)
+						SET_INT_GLOBAL(2815059 + 921, 1)end)
+					MX.action(requestoptions, "Terrorbyte", {}, "", function(on)
+						SET_INT_GLOBAL(2815059 + 925, 1)end)
+					MX.action(requestoptions, "Kosatka", {}, "", function(on)
+						SET_INT_GLOBAL(2815059 + 933, 1)end)
+			MX.toggle_loop(onlineoptions, "Disable Text Chat", {}, "", function(toggled)
+				HUD._MULTIPLAYER_CHAT_SET_DISABLED(true)end)
 			MX.divider(onlineoptions, "---> Nightclub Options <---")
 			MX.toggle_loop(onlineoptions, "Nightclub Popularity", {}, "Keeps the Nightclub Popularity at max", function ()
 				if util.is_session_started() then
 					local ncpop = math.floor(STAT_GET_INT("CLUB_POPULARITY") / 10)
 					if ncpop < 100 then
-						PT.trigger_commands("clubpopularity 100")
+						MX.trigger_commands("clubpopularity 100")
 						util.yield(250)
 					end
 				end end)
-			--[[MX.divider(onlineoptions, "---> Request's <---")
-				MX.action(onlineoptions, "MOC", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 913, 1)end)
-				MX.action(onlineoptions, "Avenger", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 921, 1)end)
-				MX.action(onlineoptions, "Terrorbyte", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 925, 1)end)
-				MX.action(onlineoptions, "Kosatka", {}, "", function(on)
-					SET_INT_GLOBAL(2815059 + 933, 1)end)]]
+			MX.divider(onlineoptions, "---> Modder Detection <---")
 			MX.action(onlineoptions,"Check Stats", {}, "Lobby check",function(on)
 					for pid = 0, 32 do
 						local rp = players.get_rank(pid)
@@ -1618,15 +1547,15 @@
 			MX.divider(cameraoptions, "---> Camera Options <---")
 			MX.toggle(cameraoptions, "FOV Tryhard", {}, "", function(on_toggle)
 					if on_toggle then
-						PT.trigger_commands("fovfponfoot".." ".."75")
+						MX.trigger_commands("fovfponfoot".." ".."75")
 					else
-						PT.trigger_commands("fovfponfoot".." ".."-1")
+						MX.trigger_commands("fovfponfoot".." ".."-1")
 					end end)
 			MX.toggle(cameraoptions, "FOV Dogfight", {}, "", function(on_toggle)
 					if on_toggle then
-						PT.trigger_commands("fovfpinveh".." ".."75")
+						MX.trigger_commands("fovfpinveh".." ".."75")
 					else
-						PT.trigger_commands("fovfpinveh".." ".."-1")
+						MX.trigger_commands("fovfpinveh".." ".."-1")
 					end end)
 		miscoptions = MX.list(MX.my_root(), "> Misc Options", {}, "", function(); end)
 			MX.divider(miscoptions, "---> Misc Options <---")
@@ -1682,7 +1611,7 @@
 					TASK.TASK_PLAY_ANIM(player, agroup, anim1, 8.0, 8.0, 3000, 0, 0, false, false, false)
 					util.yield(1000)
 					entities.create_object(ashit, c)end)
-			MX.action(miscoptions, "Custom Fake Banner", {"banner"}, "", function(on_click) PT.show_command_box("banner ") end, function(text)
+			MX.action(miscoptions, "Custom Fake Banner", {"banner"}, "", function(on_click) MX.show_command_box("banner ") end, function(text)
 				custom_alert(text)end)
 			MX.divider(miscoptions, "---> Casino <---")
 			MX.toggle_loop(miscoptions, "Auto Black Jack", {}, "", function()
@@ -1693,7 +1622,105 @@
 				else
 					PAD._SET_CONTROL_NORMAL(2, 203, 1) --pass
 				end end)
-			MX.divider(miscoptions, "---> Lobby Settings <---")
+			MX.divider(miscoptions, "---> Lobby Settings <---")	
+			menu.list_action(miscoptions, "Clear All...", {}, "", {"Peds", "Vehicles", "Objects", "Pickups", "Ropes", "Projectiles", "Sounds"}, function(index, name)
+				util.toast("Clearing "..name:lower().."...")
+				local counter = 0
+				pluto_switch index do
+					case 1:
+						for _, ped in ipairs(entities.get_all_peds_as_handles()) do
+							if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
+								entities.delete_by_handle(ped)
+								counter += 1
+								util.yield()
+							end
+						end
+						break
+					case 2:
+						for _, vehicle in ipairs(entities.get_all_vehicles_as_handles()) do
+							if vehicle ~= PED.GET_VEHICLE_PED_IS_IN(players.user_ped(), false) and DECORATOR.DECOR_GET_INT(vehicle, "Player_Vehicle") == 0 and NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(vehicle) then
+								entities.delete_by_handle(vehicle)
+								counter += 1
+							end
+							util.yield()
+						end
+						break
+					case 3:
+						for _, object in ipairs(entities.get_all_objects_as_handles()) do
+							entities.delete_by_handle(object)
+							counter += 1
+							util.yield()
+						end
+						break
+					case 4:
+						for _, pickup in ipairs(entities.get_all_pickups_as_handles()) do
+							entities.delete_by_handle(pickup)
+							counter += 1
+							util.yield()
+						end
+						break
+					case 5:
+						local temp = memory.alloc(4)
+						for i = 0, 101 do
+							memory.write_int(temp, i)
+							if PHYSICS.DOES_ROPE_EXIST(temp) then
+								PHYSICS.DELETE_ROPE(temp)
+								counter += 1
+							end
+							util.yield()
+						end
+						break
+					case 6:
+						local coords = players.get_position(players.user())
+						MISC.CLEAR_AREA_OF_PROJECTILES(coords.x, coords.y, coords.z, 1000, 0)
+						counter = "all"
+						break
+					case 4:
+						for i = 0, 99 do
+							AUDIO.STOP_SOUND(i)
+							util.yield()
+						end
+					break
+				end
+				util.toast("Cleared "..tostring(counter).." "..name:lower()..".")end)
+			MX.action(miscoptions, "Clear Everything", {"cleanse"}, "Warning: It really clears everything.", function()
+				local cleanse_entitycount = 0
+				for _, ped in pairs(entities.get_all_peds_as_handles()) do
+					if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
+						entities.delete_by_handle(ped)
+						cleanse_entitycount += 1
+					end
+				end
+				--util.toast("Cleared " .. cleanse_entitycount .. " Peds")
+				cleanse_entitycount = 0
+				for _, veh in ipairs(entities.get_all_vehicles_as_handles()) do
+					entities.delete_by_handle(veh)
+					cleanse_entitycount += 1
+					util.yield()
+				end
+				--util.toast("Cleared ".. cleanse_entitycount .." Vehicles")
+				cleanse_entitycount = 0
+				for _, object in pairs(entities.get_all_objects_as_handles()) do
+					entities.delete_by_handle(object)
+					cleanse_entitycount += 1
+				end
+				--util.toast("Cleared " .. cleanse_entitycount .. " Objects")
+				cleanse_entitycount = 0
+				for _, pickup in pairs(entities.get_all_pickups_as_handles()) do
+					entities.delete_by_handle(pickup)
+					cleanse_entitycount += 1
+				end
+				--util.toast("Cleared " .. cleanse_entitycount .. " Pickups")
+				local temp = memory.alloc(4)
+				for i = 0, 100 do
+					memory.write_int(temp, i)
+					PHYSICS.DELETE_ROPE(temp)
+				end
+				--util.toast("Cleared All Ropes")
+				local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped())
+				MISC.CLEAR_AREA_OF_PROJECTILES(pos.x, pos.y, pos.z, 400, 0)
+				Assistant("> I have removed everything from your area.",colors.green)
+				end)
 			MX.action(miscoptions, "Check Lobby", {}, "", function(on)
 				if NETWORK.NETWORK_IS_SESSION_STARTED() then
 					for pid = 0, 31 do
@@ -1838,51 +1865,18 @@
 					end
 				else
 					Assistant("> Current Session Status:\n\nSession Broken: False\nFlags: None", colors.black)
-				end	end)	
-			MX.action(miscoptions, "Clear Everything", {"cleanse"}, "Warning: It really clears everything.", function()
-				local cleanse_entitycount = 0
-				for _, ped in pairs(entities.get_all_peds_as_handles()) do
-					if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
-						entities.delete_by_handle(ped)
-						cleanse_entitycount += 1
-					end
-				end
-				--util.toast("Cleared " .. cleanse_entitycount .. " Peds")
-				cleanse_entitycount = 0
-				for _, veh in ipairs(entities.get_all_vehicles_as_handles()) do
-					entities.delete_by_handle(veh)
-					cleanse_entitycount += 1
-					util.yield()
-				end
-				--util.toast("Cleared ".. cleanse_entitycount .." Vehicles")
-				cleanse_entitycount = 0
-				for _, object in pairs(entities.get_all_objects_as_handles()) do
-					entities.delete_by_handle(object)
-					cleanse_entitycount += 1
-				end
-				--util.toast("Cleared " .. cleanse_entitycount .. " Objects")
-				cleanse_entitycount = 0
-				for _, pickup in pairs(entities.get_all_pickups_as_handles()) do
-					entities.delete_by_handle(pickup)
-					cleanse_entitycount += 1
-				end
-				--util.toast("Cleared " .. cleanse_entitycount .. " Pickups")
-				local temp = memory.alloc(4)
-				for i = 0, 100 do
-					memory.write_int(temp, i)
-					PHYSICS.DELETE_ROPE(temp)
-				end
-				--util.toast("Cleared All Ropes")
-				local pos = ENTITY.GET_ENTITY_COORDS(players.user_ped())
-				MISC.CLEAR_AREA_OF_PROJECTILES(pos.x, pos.y, pos.z, 400, 0)
-				Assistant("> I have removed everything from your area.",colors.green)
-				end)
+				end	end)
 		settings = MX.list(MX.my_root(), "> Settings", {}, "", function(); end)
 			MX.divider(settings, "---> Settings <---")
 			MX.action(settings, "Restart Script", {}, "Restarts the script to clean the errors", function()
 				util.restart_script()end)
-			MX.divider(settings, "< Version: "..MXVersion.." >")
-			MX.divider(settings, "< Created by xX-LulzSecC4t-Xx >")
+		credits = MX.list(MX.my_root(), "> Credits", {}, "", function(); end)
+			MX.divider(credits, "---> xX-LulzSecC4t-Xx <---")
+			MX.hyperlink(credits, "GitHub", "https://github.com/xX-LulzSecC4t-Xx")
+			MX.hyperlink(credits, "Discord", "https://discord.gg/bHpvhazv7T")
+			MX.hyperlink(credits, "Instagram", "https://www.instagram.com/theskillcat/")
+			MX.hyperlink(credits, "Youtube", "https://www.youtube.com/channel/UC3VLV_wgIwbikbVbdT9SCqg?view_as=subscriber")
+			MX.hyperlink(credits, "GTA5Mods", "https://de.gta5-mods.com/users/Th3Sk1llC4tHD")
 		MX.toggle(MX.my_root(), "Bail On Admin Join", {}, "", function(on)
 				if on then
 					bailOnAdminJoin = on
@@ -1993,7 +1987,7 @@
 				main = MX.list(MX.player_root(pid), "> Developer Options", {}, "", function(); end)
 				MX.divider(main, "---> Account Boosting <---")
 				MX.action(main, "All Collectibles", {"racboost"}, "", function(on)
-						PT.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid))end)
+						MX.trigger_commands("givecollectibles"..PLAYER.GET_PLAYER_NAME(pid))end)
 				MX.action(main, "Rank Them Up", {"rankboost"}, "Gives them ~175k RP. Can boost a lvl 1 ~25 levels.", function()
 						util.trigger_script_event(1 << pid, {-1178972880, pid, 5, 0, 1, 1, 1})
 						for i = 0, 9 do
@@ -2018,26 +2012,26 @@
 				MX.divider(phistory, "---> Add to Player History <---")
 				MX.action(phistory, "Add to Friendlist", {"addfriend"}, "", function(on)
 					if players.exists(pid) then
-						PT.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Friendlist")
+						MX.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Friendlist")
 						util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your friendlist.")
 					else
 						util.toast("Failed.")
 					end end)
 				MX.action(phistory, "Add to Flaggedlist", {"addflagged"}, "", function(on)
-					PT.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Flaggedlist")
-					PT.trigger_commands("track"..PLAYER.GET_PLAYER_NAME(pid).." on")
+					MX.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Flaggedlist")
+					MX.trigger_commands("track"..PLAYER.GET_PLAYER_NAME(pid).." on")
 					util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your Flagged list.")end)
 				MX.action(phistory, "Add to Whitelist", {"addwhitelist"}, "", function(on)
-					PT.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Whitelist")
+					MX.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Whitelist")
 					util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your Whitelist.")end)
 				MX.action(phistory, "Add to Blocklist", {"addblocklist"}, "", function(on)
-					PT.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Blocklist")
-					PT.trigger_commands("track"..PLAYER.GET_PLAYER_NAME(pid).." on")
-					PT.trigger_commands("historyblock"..PLAYER.GET_PLAYER_NAME(pid).." on")
+					MX.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).." > Blocklist")
+					MX.trigger_commands("track"..PLAYER.GET_PLAYER_NAME(pid).." on")
+					MX.trigger_commands("historyblock"..PLAYER.GET_PLAYER_NAME(pid).." on")
 					util.toast(PLAYER.GET_PLAYER_NAME(pid).." added to your blocklist.")end)
 				MX.divider(phistory, "---> Delete from Player History <---")
 				MX.action(phistory, "Delete Note", {"deletenote"}, "", function(on)
-					PT.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).."")
+					MX.trigger_commands("historynote"..PLAYER.GET_PLAYER_NAME(pid).."")
 					util.toast(PLAYER.GET_PLAYER_NAME(pid).." delete from your list.")end)
 				MX.divider(phistory, "---> "..PLAYER.GET_PLAYER_NAME(pid).." | RID: "..players.get_rockstar_id(pid).." <---")
 			protherstuff = MX.list(MX.player_root(pid), "> Weapon Options", {}, "", function(); end)
@@ -2273,23 +2267,23 @@
 					util.trigger_script_event(1 << pid, {-555356783, pid, math.random(1, 32), 32, NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(pid), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
 					util.yield(1000)end)	
 				soundspam = MX.list(trolling, "> Sound Spam", {}, "")
-				MX.toggle_loop(soundspam, "SMS Spam", {}, "", function()
-					util.trigger_script_event(1 << pid, {1670832796, pid, math.random(-2147483647, 2147483647)})end)
-				MX.toggle_loop(soundspam, "Interior Invite", {}, "", function()
-					util.trigger_script_event(1 << pid, {1111927333, pid, math.random(1, 6)})end)
-				MX.toggle_loop(soundspam, "Invite Notification", {}, "", function()
-					util.trigger_script_event(1 << pid, {-668341698, pid, math.random(1, 150), -1, -1})end)
-				MX.toggle_loop(soundspam, "Collected Checkpoint", {}, "", function()
-					util.trigger_script_event(1 << pid, {-1529596656, pid, -547323955, 0, 0, 0, 0, 0, 0, 0, pid, 0, 0, 0})
-					util.yield(25)end)
-				MX.toggle_loop(soundspam, "Character Notification", {}, "", function()
-					util.trigger_script_event(1 << pid, {-634789188, pid, math.random(0, 178), 0, 0, 0})end)
-				MX.toggle_loop(soundspam, "Error Notification", {}, "", function()
-					util.trigger_script_event(1 << pid, {-1251171789, pid, math.random(-2147483647, 2147483647)})end)
+					MX.toggle_loop(soundspam, "SMS Spam", {}, "", function()
+						util.trigger_script_event(1 << pid, {1670832796, pid, math.random(-2147483647, 2147483647)})end)
+					MX.toggle_loop(soundspam, "Interior Invite", {}, "", function()
+						util.trigger_script_event(1 << pid, {1111927333, pid, math.random(1, 6)})end)
+					MX.toggle_loop(soundspam, "Invite Notification", {}, "", function()
+						util.trigger_script_event(1 << pid, {-668341698, pid, math.random(1, 150), -1, -1})end)
+					MX.toggle_loop(soundspam, "Collected Checkpoint", {}, "", function()
+						util.trigger_script_event(1 << pid, {-1529596656, pid, -547323955, 0, 0, 0, 0, 0, 0, 0, pid, 0, 0, 0})
+						util.yield(25)end)
+					MX.toggle_loop(soundspam, "Character Notification", {}, "", function()
+						util.trigger_script_event(1 << pid, {-634789188, pid, math.random(0, 178), 0, 0, 0})end)
+					MX.toggle_loop(soundspam, "Error Notification", {}, "", function()
+						util.trigger_script_event(1 << pid, {-1251171789, pid, math.random(-2147483647, 2147483647)})end)
 				MX.divider(trolling, "---> PVP Options <---")
 				MX.action(trolling, "Disable Ghost", {"disghost"}, "", function(on)
 					Assistant("> Please wait, while I transfer the bounty.\n\n> Target: "..PLAYER.GET_PLAYER_NAME(pid), colors.blue)
-					PT.trigger_commands("bounty"..PLAYER.GET_PLAYER_NAME(pid).." 1337")
+					MX.trigger_commands("bounty"..PLAYER.GET_PLAYER_NAME(pid).." 1337")
 					util.yield(10500)
 					Assistant("> Transfer completed.\n\n> Target: "..PLAYER.GET_PLAYER_NAME(pid), colors.blue)end)
 				MX.divider(trolling, "---> Tryharder Trolling <---")
@@ -2361,7 +2355,7 @@
 		util.on_stop(function()
 			Assistant("Bye "..SOCIALCLUB._SC_GET_NICKNAME().."!!!", colors.pink)end)
 		-- (Buttom Text)
-			MX.divider(MX.my_root(), "---> Script successfully loaded! <---")
+			MX.divider(MX.my_root(), "---> Version: "..MXVersion.." <---")
 
 	-- {End Script}
 		util.create_tick_handler(function()
