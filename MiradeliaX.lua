@@ -13,17 +13,17 @@
 
 -- [[MiradeliaX Script]]
 	local MXName = "MiradeliaX"
-	local MXVersion = 1.3
+	local MXVersion = 1.5
 	-- {Update Script}
 		local response = false
-			async_http.init("raw.githubusercontent.com", "/xX-LulzSecC4t-Xx/MiradeliaX/main/MiradeliaXVersion.lua", function(output)
+			async_http.init("raw.githubusercontent.com", "/I3lackExo/MiradeliaX/main/MiradeliaXVersion.lua", function(output)
 				currentVer = tonumber(output)
 				response = true
 				if MXVersion ~= currentVer then
 					util.show_corner_help("~h~~p~New MiradeliaX version is available!!!")
 					--util.toast("New MiradeliaX version is available!!!")
 					menu.action(menu.my_root(), "Update MiradeliaX", {}, "", function()
-						async_http.init("raw.githubusercontent.com","/xX-LulzSecC4t-Xx/MiradeliaX/main/MiradeliaX.lua",function(a)
+						async_http.init("raw.githubusercontent.com","/I3lackExo/MiradeliaX/main/MiradeliaX.lua",function(a)
 							local err = select(2,load(a))
 							if err then
 								util.show_corner_help("~r~Script failed to download. Please try again later. If this continues to happen then manually update via github.")
@@ -943,17 +943,6 @@
 					if util.is_session_started() then
 					memory.write_float(memory.script_global(262145 + 30176), 200000.0)
 					end end)
-				MX.toggle_loop(pvpoptions, "Max Auto-Aim Range", {""}, "", function()
-					PLAYER.SET_PLAYER_LOCKON_RANGE_OVERRIDE(players.user(), 99999999.0)end)
-				MX.divider(pvpoptions, "---> Weapon Buffs <---")
-				MX.toggle(pvpoptions, "Better Precision Rifle", {}, "", function(on_toggle)
-					if on_toggle then
-						MX.trigger_commands("damagemultiplier".." ".."1.60")
-						MX.trigger_commands("rangemultiplier".." ".."1.50")
-					else
-						MX.trigger_commands("damagemultiplier".." ".."1.00")
-						MX.trigger_commands("rangemultiplier".." ".."1.00")
-					end end)
 				MX.divider(pvpoptions, "---> Request's <---")
 				MX.action(pvpoptions, "Ballistic Armor", {}, "", function(on)
 					 SET_INT_GLOBAL(2815059 + 884, 1)end)
@@ -1340,7 +1329,7 @@
 						WEAPON.SET_CURRENT_PED_WEAPON(players.user_ped(), MISC.GET_HASH_KEY("WEAPON_UNARMED"), true)
 						TASK.TASK_PLAY_ANIM(players.user_ped(), dict, name, 8.0, 8.0, -1, 1, 0, false, false, false)end)
 			MX.divider(selfoptions, "---> Bounty Remover <---")
-			MX.action(selfoptions, "Remove Bounty", {"rbounty"}, "", function(on)
+			MX.action(selfoptions, "Remove Bounty", {"ptbounty"}, "", function(on)
 				if memory.read_int(memory.script_global(1835502 + 4 + 1 + (players.user() * 3))) == 1 then 
 					memory.write_int(memory.script_global(2815059 + 1856 + 17), -1)
 					memory.write_int(memory.script_global(2359296 + 1 + 5149 + 13), 2880000)
@@ -1421,7 +1410,7 @@
 						util.yield(250)
 					end
 				end end)
-			MX.divider(onlineoptions, "---> Modder Detection <---")
+			MX.divider(onlineoptions, "---> UA Detection <---")
 			MX.action(onlineoptions,"Check Stats", {}, "Lobby check",function(on)
 					for pid = 0, 32 do
 						local rp = players.get_rank(pid)
@@ -1467,6 +1456,18 @@
 							end)
 						end
 					end
+				MX.divider(weaponsoptions, "---> Aim Range Buff <---")
+				MX.toggle_loop(weaponsoptions, "Max Auto-Aim Range", {""}, "", function()
+					PLAYER.SET_PLAYER_LOCKON_RANGE_OVERRIDE(players.user(), 99999999.0)end)
+				MX.divider(weaponsoptions, "---> Weapon Buffs <---")
+				MX.toggle(weaponsoptions, "Better Precision Rifle", {}, "", function(on_toggle)
+					if on_toggle then
+						MX.trigger_commands("damagemultiplier".." ".."1.60")
+						MX.trigger_commands("rangemultiplier".." ".."1.50")
+					else
+						MX.trigger_commands("damagemultiplier".." ".."1.00")
+						MX.trigger_commands("rangemultiplier".." ".."1.00")
+					end end)
 		vehicleoptions = MX.list(MX.my_root(), "> Vehicle Options", {}, "", function(); end)
 			MX.divider(vehicleoptions, "---> Zeromenu Drifting <---")
 			MX.action(vehicleoptions, "Drift", {}, "", function(toggle)
@@ -1530,7 +1531,7 @@
 					PED.SET_ENABLE_HANDCUFFS(PLAYER.PLAYER_PED_ID(), false)
 				end
 				util.yield()end)
-			MX.slider(vehicleoptions, "Change seat", {"switchseat"}, "DriverSeat = -1 Passenger = 0 Left Rear = 1 RightRear = 2", -1, 2, -1, 1, function(seatnumber)
+			MX.slider(vehicleoptions, "Change seat", {}, "DriverSeat = -1 Passenger = 0 Left Rear = 1 RightRear = 2", -1, 2, -1, 1, function(seatnumber)
 					local ped = PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(players.user())
 					local vehicle = entities.get_user_vehicle_as_handle()
 					PED.SET_PED_INTO_VEHICLE(ped, vehicle, seatnumber)end)
@@ -1545,13 +1546,13 @@
 					end end)
 		cameraoptions = MX.list(MX.my_root(), "> Camera Options", {}, "", function(); end)
 			MX.divider(cameraoptions, "---> Camera Options <---")
-			MX.toggle(cameraoptions, "FOV Tryhard", {}, "", function(on_toggle)
+			MX.toggle(cameraoptions, "FOV Tryhard FP", {}, "", function(on_toggle)
 					if on_toggle then
 						MX.trigger_commands("fovfponfoot".." ".."75")
 					else
 						MX.trigger_commands("fovfponfoot".." ".."-1")
 					end end)
-			MX.toggle(cameraoptions, "FOV Dogfight", {}, "", function(on_toggle)
+			MX.toggle(cameraoptions, "FOV Dogfight FP", {}, "", function(on_toggle)
 					if on_toggle then
 						MX.trigger_commands("fovfpinveh".." ".."75")
 					else
@@ -1571,7 +1572,7 @@
 						local coords = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), 0.0, i, 0.0)
 						FIRE.ADD_EXPLOSION(coords['x'], coords['y'], coords['z'], 67, 0.0, false, false, 0.0, true)
 					end end)
-				MX.action(funnyoptions, "Massive shit", {"mshit"}, "Make a massive shit", function()
+				MX.action(funnyoptions, "Massive shit", {}, "Make a massive shit", function()
 					local c = ENTITY.GET_ENTITY_COORDS(players.user_ped())
 					c.z = c.z -1
 					while not STREAMING.HAS_ANIM_DICT_LOADED(agroup) do 
@@ -1581,7 +1582,7 @@
 					TASK.TASK_PLAY_ANIM(player, agroup, anim1, 8.0, 8.0, 3000, 0, 0, false, false, false)
 					util.yield(1000)
 					entities.create_object(mshit, c)end)
-				MX.action(funnyoptions, "Normal shit", {"nshit"}, "Make a normale sized shit", function()
+				MX.action(funnyoptions, "Normal shit", {}, "Make a normale sized shit", function()
 					local c = ENTITY.GET_ENTITY_COORDS(players.user_ped())
 					c.z = c.z -1
 					while not STREAMING.HAS_ANIM_DICT_LOADED(agroup) do 
@@ -1601,7 +1602,7 @@
 					TASK.TASK_PLAY_ANIM(player, agroup, anim1, 8.0, 8.0, 3000, 0, 0, false, false, false)
 					util.yield(1000)
 					entities.create_object(mshit2, c)end)
-				MX.action(funnyoptions, "SoMe sOdA?", {"ashit"}, "", function()
+				MX.action(funnyoptions, "SoMe sOdA?", {}, "", function()
 					local c = ENTITY.GET_ENTITY_COORDS(players.user_ped())
 					c.z = c.z -1
 					while not STREAMING.HAS_ANIM_DICT_LOADED(agroup) do 
@@ -1683,7 +1684,7 @@
 					break
 				end
 				util.toast("Cleared "..tostring(counter).." "..name:lower()..".")end)
-			MX.action(miscoptions, "Clear Everything", {"cleanse"}, "Warning: It really clears everything.", function()
+			MX.action(miscoptions, "Clear Everything", {"ptclean"}, "Warning: It really clears everything.", function()
 				local cleanse_entitycount = 0
 				for _, ped in pairs(entities.get_all_peds_as_handles()) do
 					if ped ~= players.user_ped() and not PED.IS_PED_A_PLAYER(ped) then
@@ -1868,7 +1869,7 @@
 				end	end)
 		settings = MX.list(MX.my_root(), "> Settings", {}, "", function(); end)
 			MX.divider(settings, "---> Settings <---")
-			MX.action(settings, "Restart Script", {}, "Restarts the script to clean the errors", function()
+			MX.action(settings, "Restart Script", {"ptrestart"}, "Restarts the script to clean the errors", function()
 				util.restart_script()end)
 		credits = MX.list(MX.my_root(), "> Credits", {}, "", function(); end)
 			MX.divider(credits, "---> xX-LulzSecC4t-Xx <---")
@@ -1952,7 +1953,7 @@
 				if vehicle then	
 					ENTITY.SET_ENTITY_INVINCIBLE(vehicle, false) 
 				end end)
-			MX.toggle_loop(MX.player_root(pid), "Remove Godmode", {"removegm"}, "removes the players godmode by forcing camera forward. blocked by most menus", function()
+			MX.toggle_loop(MX.player_root(pid), "Remove Godmode", {}, "removes the players godmode by forcing camera forward. blocked by most menus", function()
 				if not players.exists(pid) then
 					util.stop_thread()
 				end
@@ -2281,28 +2282,28 @@
 					MX.toggle_loop(soundspam, "Error Notification", {}, "", function()
 						util.trigger_script_event(1 << pid, {-1251171789, pid, math.random(-2147483647, 2147483647)})end)
 				MX.divider(trolling, "---> PVP Options <---")
-				MX.action(trolling, "Disable Ghost", {"disghost"}, "", function(on)
+				MX.action(trolling, "Disable Ghost", {"ptghost"}, "", function(on)
 					Assistant("> Please wait, while I transfer the bounty.\n\n> Target: "..PLAYER.GET_PLAYER_NAME(pid), colors.blue)
 					MX.trigger_commands("bounty"..PLAYER.GET_PLAYER_NAME(pid).." 1337")
 					util.yield(10500)
 					Assistant("> Transfer completed.\n\n> Target: "..PLAYER.GET_PLAYER_NAME(pid), colors.blue)end)
 				MX.divider(trolling, "---> Tryharder Trolling <---")
-				MX.action(trolling, "Remove Explosive Sniper", {}, "", function(on)
+				MX.action(trolling, "Remove Explosive Sniper", {"ptexplo"}, "", function(on)
 					WEAPON.REMOVE_WEAPON_FROM_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
 					WEAPON.GIVE_WEAPON_TO_PED(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid), 0xA914799)
 					Assistant("> I removed explosive sniper from " .. PLAYER.GET_PLAYER_NAME(pid), colors.green)end)
 			crash = MX.list(MX.player_root(pid), "> Kicks & Crashes", {}, "", function(); end)
 				MX.divider(crash, "---> Basic Kicks <---")
-				MX.action(crash, "Host-Kick", {"pthost"}, "Host Kick. Command: pthost", function()
+				MX.action(crash, "Host-Kick", {"pthost"}, "Host Kick.", function()
 					if NETWORK.NETWORK_IS_HOST() then
 						NETWORK.NETWORK_SESSION_KICK_PLAYER(pid)
 					end end)
-				MX.action(crash, "Network Bail", {"ptbail"}, "Network Bail. Command: ptbail", function()
+				MX.action(crash, "Network Bail", {"ptbail"}, "Network Bail.", function()
 					util.trigger_script_event(1 << pid, {1674887089, players.user(), memory.read_int(memory.script_global(1892703 + 1 + (pid * 599) + 510))})end)
-				MX.divider(crash, "---> Another Kicks/Crashes <---")
-				MX.action(crash, "Kick", {"ptkick"}, "Normal kick. Command: ptkick", function()
-					util.trigger_script_event(1 << pid, {111242367, pid, -210634234})end)
-				MX.action(crash, "UwU Crash", {"ptuwu"}, "D0 Crash prevented by Stand. (Blocked by most PTs) Command: ptuwu", function()
+				MX.divider(crash, "---> Crashes <---")
+				--[[MX.action(crash, "Kick", {"ptkick"}, "Normal kick. Command: ptkick", function()
+					util.trigger_script_event(1 << pid, {111242367, pid, -210634234})end)]]
+				MX.action(crash, "Broken World Crash", {"ptbwc"}, "The crash remains after leaving the lobby.", function()
 					local pos = ENTITY.GET_ENTITY_COORDS(PLAYER.GET_PLAYER_PED_SCRIPT_INDEX(pid))
 					local hakuchou = util.joaat("hakuchou2")
     
@@ -2315,13 +2316,20 @@
 					VEHICLE.SET_VEHICLE_MOD(vehicle, 34, 3, false)
 					util.yield(1000)
 					entities.delete_by_handle(vehicle)end)
-				MX.divider(crash, "---> OP Kicks/Crashes <---")
-				MX.action(crash, "Mother Nature Crash", {"ptmncrash"}, "Can crash 2Take1, Cherax etc. ptmncrash", function()
+				MX.action(crash, "AI Generated Crash", {"ptai"}, "", function()
+					local player_position = players.get_position(pid)
+					local joaat_hash = util.joaat("prop_fragtest_cnst_04")
+					util.request_model(joaat_hash)
+					local object_handle = entities.create_object(joaat_hash, player_position)
+					OBJECT.BREAK_OBJECT_FRAGMENT_CHILD(object_handle, 3, false)
+					util.yield(1000)
+					entities.delete_by_handle(object_handle)end)
+				MX.action(crash, "Mother Nature Crash", {"ptmncrash"}, "Can crash 2Take1, Cherax etc.", function()
 					local user = PLAYER.GET_PLAYER_PED(players.user())
 					local model = util.joaat("h4_prop_bush_mang_ad")
 					local pos = players.get_position(pid)
 					local oldPos = players.get_position(players.user())
-					BlockSyncs(pid, function() -- blocking outgoing syncs to prevent the lobby from crashing :5head:
+					BlockSyncs(pid, function()
 						util.yield(100)
 						ENTITY.SET_ENTITY_VISIBLE(user, false)
 						ENTITY.SET_ENTITY_COORDS_NO_OFFSET(user, pos.x, pos.y, pos.z, false, false, false)
@@ -2332,9 +2340,9 @@
 						util.yield(2500)
 						TASK.CLEAR_PED_TASKS_IMMEDIATELY(user)
 						for i = 1, 5 do
-							util.spoof_script("freemode", SYSTEM.WAIT) -- preventing wasted screen
+							util.spoof_script("freemode", SYSTEM.WAIT)
 						end
-						ENTITY.SET_ENTITY_HEALTH(user, 0) -- killing ped because it will still crash others until you die (clearing tasks doesnt seem to do much)
+						ENTITY.SET_ENTITY_HEALTH(user, 0)
 						NETWORK.NETWORK_RESURRECT_LOCAL_PLAYER(oldPos.x, oldPos.y, oldPos.z, 0, false, false, 0)
 						ENTITY.SET_ENTITY_VISIBLE(user, true)
 					end)end) end
